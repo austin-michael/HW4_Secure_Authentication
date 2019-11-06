@@ -5,7 +5,7 @@ import csv
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f',
-                    help='Filename you would like to output the csv to',
+                    help='Password file used to generate password list',
                     type=str,
                     default='data/30-pwds.txt')
 args = parser.parse_args()
