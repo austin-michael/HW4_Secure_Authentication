@@ -8,6 +8,10 @@ parser.add_argument('-f',
                     help='Password file used to generate password list',
                     type=str,
                     default='data/30-pwds.txt')
+parser.add_argument('-o',
+                    help='Output file name',
+                    type=str,
+                    default='./ELCP-1.txt')
 args = parser.parse_args()
 
 def smart_pass_permuations(password=None):
@@ -117,11 +121,17 @@ if __name__ == '__main__':
             for row in reader:
                 password_list.append(row[0])
                 final_list.append(row[0])
+            f.close()
     for password in password_list:
         final_list += smart_pass_permuations(password=password)
+    final_list.sort()
+    with open(args.o, 'w', newline='') as f:
+        writer = csv.writer(f, delimiter=' ')
+        for pw in final_list:
+            writer.writerow([pw])
 
-    from IPython import embed
-    embed()
+    # from IPython import embed
+    # embed()
 
 
 
