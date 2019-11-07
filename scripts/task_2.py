@@ -67,21 +67,24 @@ def leetize_me_captain(password):
     ret_list.sort()
     return ret_list
 
-def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='', apt_num='', city='', state='', zip_code='', first_six_tele=''):
+def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='', street='', apt_num='', city='', state='', zip_code='', email=''):
     inputs = []
     possible_emails = remove_email_domain(email)
-
+    first_six_tele = telephone_number[:7]
+    first_six_tele = first_six_tele.replace('-','')
     possible_street_address = split_street_address(street)
+
+    if apt_num == "NA":
+        inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
+    else:
+        inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
 
     for item in possible_street_address:
         inputs.append(item)
 
     for item in possible_emails:
         inputs.append(item)
-    if apt_num == "NA":
-        inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
-    else:
-        inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
+
     passwords = []
     for item in inputs:
         passwords += leetize_me_captain(item)
@@ -107,9 +110,6 @@ if __name__ == '__main__':
     state = input("State: ")
     zip_code = input("Zip Code (first 5 digit): ")
     email = input("Email ID: ")
-
-    first_six_tele = telephone_number[:7]
-    first_six_tele = first_six_tele.replace('-','')
 
     passwords = gen_file(first_name=first_name, last_name=last_name, date_of_birth=date_of_birth, telephone_number=telephone_number, apt_num=apt_num, city=city, state=state, zip_code=zip_code, first_six_tele=first_six_tele)
 
