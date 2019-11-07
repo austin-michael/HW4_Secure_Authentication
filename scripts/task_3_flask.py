@@ -34,7 +34,7 @@ def password():
         if pw_valid:
             storePassword(request.form['email'], request.form['password'])
             return redirect(url_for('login'))
-    return render_template('password.html', error=error, email=request.args['email'])
+    return render_template('password.html', error=error, email=request.args.get('email', default=''))
     # the code below is executed if the request method
     # was GET or the credentials were invalid
 
