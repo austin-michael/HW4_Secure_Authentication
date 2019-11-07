@@ -20,7 +20,7 @@ def infoform():
     if request.method == 'POST':
         gen_file(first_name=request.form['fName'], last_name=request.form['lName'], date_of_birth=request.form['bDay'], telephone_number=request.form['phone'],
                  street=request.form['street'], apt_num=request.form['aptNum'], city=request.form['city'], state=request.form['state'], zip_code=request.form['zip'], email=request.form['email'])
-        return redirect(url_for('password'))
+        return redirect(url_for('password', email=request.form['email'], **request.args))
     # the code below is executed if the request method
     # was GET or the credentials were invalid
     return render_template('index.html', error=error)
@@ -32,8 +32,9 @@ def password():
     if request.method == 'POST':
         pw_valid, error = valid_password(request.form['password'])
         if pw_valid:
+            storePassword(request.form['email'], request.form['password'])
             return redirect(url_for('login'))
-    return render_template('password.html', error=error, email=request.form['email'])
+    return render_template('password.html', error=error, email=request.args['email'])
     # the code below is executed if the request method
     # was GET or the credentials were invalid
 
@@ -80,16 +81,23 @@ def valid_password(password):
 def log_the_user_in():
     pass
 
+def storePassword(email, password):
+    seed(time.time())
+    salt = randint(487564, 45729857452974)
+    password += str(salt)
+
+    m = hashlib.new("sha256")
+    m.update(password.encode())
+
+    hash_digest = open("hash_digest.txt", "a+")
+    hash_digest.write('{}, {}\n'.format(email, m.hexdigest()))
+    salt_file = open("salt.txt", "a+")
+    salt_file.write('{}, {}\n'.format(email, str(salt)))
 
 
-# password_test = "password123"
-# seed(time.time())
-# salt = randint(487564,45729857452974)
-# password_test += salt
-#
-# m = hashlib.new("sha512")
-# m.update(password_test)
-# m.hexdigest()
+
+
+
 
 # if __name__ == '__main__':
 app.run(debug=True)
