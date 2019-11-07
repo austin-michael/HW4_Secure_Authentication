@@ -12,44 +12,12 @@ parser.add_argument('-o',
                     default='./ELCP-2.txt')
 args = parser.parse_args()
 
-# Get user's personal information
-first_name = input("First Name: ")
-last_name = input("Last Name: ")
-date_of_birth = input("Date of Birth (Format: MM/DD/YYYY): ")
-telephone_number = input("Telephone Number (Format: xxx-xxx-xxxx):")
-street = input("Street number and name: ")
-apt_num = input("APT No. (If not applicable enter NA): ")
-city = input("City: ")
-state = input("State: ")
-zip_code = input("Zip Code (first 5 digit): ")
-email = input("Email ID: ")
-
-first_six_tele = telephone_number[:7]
-first_six_tele = first_six_tele.replace('-','')
-
-inputs = []
-
-if apt_num == "NA":
-    inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
-else:
-    inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
-
 def remove_email_domain(email):
     temp_email = email.split('@')[0]
     return temp_email.split('_')
 
-possible_emails = remove_email_domain(email)
-
-for item in possible_emails:
-    inputs.append(item)
-
 def split_street_address(street):
     return street.split(' ')
-
-possible_street_address = split_street_address(street)
-
-for item in possible_street_address:
-    inputs.append(item)
 
 def leetize_me_captain(password):
     ret_list = []
@@ -99,17 +67,51 @@ def leetize_me_captain(password):
     ret_list.sort()
     return ret_list
 
-passwords = []
+def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='', apt_num='', city='', state='', zip_code='', first_six_tele=''):
+    inputs = []
+    possible_emails = remove_email_domain(email)
 
-for item in inputs:
-    passwords += leetize_me_captain(item)
-    passwords.append(item)
-passwords = list(set(passwords))
-passwords.sort()
-with open(args.o, 'w', newline='') as f:
-    writer = csv.writer(f, delimiter=' ')
-    for pw in passwords:
-        writer.writerow([pw])
+    possible_street_address = split_street_address(street)
 
-print("List of common passwords with the given information: ")
-print(*passwords, sep = "\n")
+    for item in possible_street_address:
+        inputs.append(item)
+
+    for item in possible_emails:
+        inputs.append(item)
+    if apt_num == "NA":
+        inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
+    else:
+        inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
+    passwords = []
+    for item in inputs:
+        passwords += leetize_me_captain(item)
+        passwords.append(item)
+    passwords = list(set(passwords))
+    passwords.sort()
+    with open(args.o, 'w', newline='') as f:
+        writer = csv.writer(f, delimiter=' ')
+        for pw in passwords:
+            writer.writerow([pw])
+    return passwords
+
+
+if __name__ == '__main__':
+    # Get user's personal information
+    first_name = input("First Name: ")
+    last_name = input("Last Name: ")
+    date_of_birth = input("Date of Birth (Format: MM/DD/YYYY): ")
+    telephone_number = input("Telephone Number (Format: xxx-xxx-xxxx):")
+    street = input("Street number and name: ")
+    apt_num = input("APT No. (If not applicable enter NA): ")
+    city = input("City: ")
+    state = input("State: ")
+    zip_code = input("Zip Code (first 5 digit): ")
+    email = input("Email ID: ")
+
+    first_six_tele = telephone_number[:7]
+    first_six_tele = first_six_tele.replace('-','')
+
+    passwords = gen_file(first_name=first_name, last_name=last_name, date_of_birth=date_of_birth, telephone_number=telephone_number, apt_num=apt_num, city=city, state=state, zip_code=zip_code, first_six_tele=first_six_tele)
+
+    print("List of common passwords with the given information: ")
+    print(*passwords, sep = "\n")
