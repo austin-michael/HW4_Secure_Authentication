@@ -67,6 +67,20 @@ def leetize_me_captain(password):
     ret_list.sort()
     return ret_list
 
+def capitalize_nth(s, n):
+    return s[:n].lower() + s[n:].capitalize()
+
+def caseChanger(password): #TODO update this so multiple characters will be capitalized at the same time
+    ret_list = []
+    low_pass = password.lower()
+    ret_list.append(low_pass)
+    ret_list.append(password.upper())
+    i = 0
+    while i < len(low_pass):
+        ret_list.append(capitalize_nth(low_pass, i))
+        i += 1
+    return ret_list
+
 def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='', street='', apt_num='', city='', state='', zip_code='', email=''):
     inputs = []
     possible_emails = remove_email_domain(email)
@@ -80,6 +94,7 @@ def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='',
     fNameDOBYYYY = first_name + date_of_birth[-4:]
     lNameDOBYYYY = last_name + date_of_birth[-4:]
 
+    charCaseChanger = [first_name, last_name, city, state]
 
     if apt_num == "NA":
         inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:], flName, lfName, fNameDOBYY, lNameDOBYY, fNameDOBYYYY, lNameDOBYYYY]
@@ -91,6 +106,11 @@ def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='',
 
     for item in possible_emails:
         inputs.append(item)
+
+    for item in charCaseChanger:
+        list_changed_cases = caseChanger(item)
+        for string in list_changed_cases:
+            inputs.append(string)
 
     passwords = []
     for item in inputs:
@@ -122,3 +142,4 @@ if __name__ == '__main__':
 
     print("List of common passwords with the given information: ")
     print(*passwords, sep = "\n")
+    print(caseChanger("password"))
