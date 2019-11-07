@@ -73,11 +73,18 @@ def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='',
     first_six_tele = telephone_number[:7]
     first_six_tele = first_six_tele.replace('-','')
     possible_street_address = split_street_address(street)
+    flName = first_name + last_name
+    lfName = last_name + first_name
+    fNameDOBYY = first_name + date_of_birth[-2:]
+    lNameDOBYY = last_name + date_of_birth[-2:]
+    fNameDOBYYYY = first_name + date_of_birth[-4:]
+    lNameDOBYYYY = last_name + date_of_birth[-4:]
+
 
     if apt_num == "NA":
-        inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
+        inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:], flName, lfName, fNameDOBYY, lNameDOBYY, fNameDOBYYYY, lNameDOBYYYY]
     else:
-        inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:]]
+        inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:], flName, lfName, fNameDOBYY, lNameDOBYY, fNameDOBYYYY, lNameDOBYYYY]
 
     for item in possible_street_address:
         inputs.append(item)
@@ -111,7 +118,7 @@ if __name__ == '__main__':
     zip_code = input("Zip Code (first 5 digit): ")
     email = input("Email ID: ")
 
-    passwords = gen_file(first_name=first_name, last_name=last_name, date_of_birth=date_of_birth, telephone_number=telephone_number, apt_num=apt_num, city=city, state=state, zip_code=zip_code, first_six_tele=first_six_tele)
+    passwords = gen_file(first_name=first_name, last_name=last_name, date_of_birth=date_of_birth, telephone_number=telephone_number, apt_num=apt_num, city=city, state=state, zip_code=zip_code, email=email)
 
     print("List of common passwords with the given information: ")
     print(*passwords, sep = "\n")
