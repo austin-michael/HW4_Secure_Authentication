@@ -42,14 +42,15 @@ def password():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
+    message = None
     if request.method == 'POST':
-        if valid_login(request.form['password']):
-            return log_the_user_in()
+        if valid_login(request.form['email'], request.form['password']):
+            message = 'You would log in succesfully'
         else:
             error = 'Invalid username/password'
     # the code below is executed if the request method
     # was GET or the credentials were invalid
-    return render_template('login.html', error=error)
+    return render_template('login.html', error=error, message=message)
 
 
 def valid_password(password):
@@ -81,20 +82,62 @@ def valid_password(password):
 def log_the_user_in():
     pass
 
+
 def storePassword(email, password):
-    seed(time.time())
-    salt = randint(487564, 45729857452974)
+    digest, salt = hash_pass(password)
+
+    hash_digest = open("hash_digest.txt", "a+")
+    hash_digest.write('{}, {}\n'.format(email, digest))
+    salt_file = open("salt.txt", "a+")
+    salt_file.write('{}, {}\n'.format(email, str(salt)))
+    hash_digest.close()
+    salt_file.close()
+
+
+def hash_pass(password, salt=None):
+    if salt is None:
+        seed(time.time())
+        salt = randint(100000, 99999999999)
     password += str(salt)
 
     m = hashlib.new("sha256")
     m.update(password.encode())
-
-    hash_digest = open("hash_digest.txt", "a+")
-    hash_digest.write('{}, {}\n'.format(email, m.hexdigest()))
-    salt_file = open("salt.txt", "a+")
-    salt_file.write('{}, {}\n'.format(email, str(salt)))
+    return m.hexdigest(), salt
 
 
+def valid_login(email, password):
+    hash_dict = get_hash_dict(email, password)
+
+    user_salt = ''
+    user_digest = ''
+    try:
+        tmphash = hash_dict[email].split('.')
+        user_salt = tmphash[0]
+        user_digest = tmphash[1]
+    except KeyError:
+        return False
+
+    test_digest, _ = hash_pass(password, salt=user_salt)
+    if test_digest == user_digest:
+        return True
+    return False
+
+
+def get_hash_dict(email, password):
+    """
+    Reads in dictionary of hashes and salts. Final stored format is '<salt>.<hash>'
+    """
+    hash_dict = {}
+    with open('hash_digest.txt', 'r') as hashfile, open('salt.txt', 'r') as saltfile:
+        salt_reader = csv.reader(saltfile)
+        for row in salt_reader:
+            hash_dict[row[0]] = row[1].strip()
+        saltfile.close()
+        hash_reader = csv.reader(hashfile)
+        for row in hash_reader:
+            hash_dict[row[0]] = '{salt}.{hash}'.format(salt=hash_dict[row[0]], hash=row[1].strip())
+        hashfile.close()
+    return hash_dict
 
 
 
