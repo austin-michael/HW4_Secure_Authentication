@@ -129,11 +129,6 @@ def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='',
     for i, item in enumerate(possible_emails):
         inputs['email_address'].append(item)
 
-    # for item in charCaseChanger:
-    #     list_changed_cases = caseChanger(item)
-    #     for string in list_changed_cases:
-    #         inputs.append(string)
-
     passwords = {}
     for key, lst in inputs.items():
         passwords[key] = []
@@ -147,9 +142,7 @@ def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='',
         for key, lst in passwords.items():
             for pw in lst:
                 writer.writerow([key.replace('_', ' '), pw])
-                writer.writerow([key.replace('_', ' '), pw.upper()])
-                for item in caseChanger(pw):
-                    writer.writerow([key.replace('_', ' '), item])
+                writer.writerow([key.replace('_', ' '), pw.lower()])
     return passwords
 
 
