@@ -1,12 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for
-from random import seed
-from random import randint
-import time
-import hashlib
-from task_2 import *
 import csv
+import hashlib
+import time
+from random import randint, seed
+
+import pendulum
+from flask import Flask, redirect, render_template, request, url_for
+
+from task_2 import *
 
 app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    return redirect(url_for('infoform'))
 
 
 @app.route('/infoform')
@@ -44,13 +51,17 @@ def login():
     error = None
     message = None
     if request.method == 'POST':
-        if valid_login(request.form['email'], request.form['password']):
-            message = 'You would log in succesfully'
+        would_log_in = valid_login(request.form['email'], request.form['password'])
+        timeout = get_timeout(request.form['email'], would_log_in)
+        if pendulum.now('UTC') > timeout:
+            if would_log_in:
+                message = 'You would log in succesfully'
+            else:
+                error = 'Invalid username/password'
         else:
-            error = 'Invalid username/password'
-    # the code below is executed if the request method
-    # was GET or the credentials were invalid
-    return render_template('login.html', error=error, message=message)
+            error = 'You have been locked out, you can log in again in {num} minutes'.format(num=(timeout - pendulum.now('UTC')).in_minutes()+1)
+
+    return render_template('login.html', error=error, message=message, email=request.form.get('email', default=None))
 
 
 def valid_password(password):
@@ -87,9 +98,9 @@ def storePassword(email, password):
     digest, salt = hash_pass(password)
 
     hash_digest = open("hash_digest.txt", "a+")
-    hash_digest.write('{}, {}\n'.format(email, digest))
+    hash_digest.write('{}, {}\n'.format(email.lower().strip(), digest.strip()))
     salt_file = open("salt.txt", "a+")
-    salt_file.write('{}, {}\n'.format(email, str(salt)))
+    salt_file.write('{}, {}\n'.format(email.lower().strip(), str(salt)))
     hash_digest.close()
     salt_file.close()
 
@@ -140,7 +151,68 @@ def get_hash_dict(email, password):
     return hash_dict
 
 
+def get_timeout(email, login_success):
+    email = email.lower().strip()
+    timeout_until = pendulum.now('UTC').to_iso8601_string()
+    attempts = 0
+
+    # Get timeout dictionary [email, timeout_until, attempts]
+    file_dict = read_timeout_dict()
+
+    # If user exists
+    if file_dict.get(email):
+        timeout_until = file_dict[email][0]
+        attempts = int(file_dict[email][1])
+    # Not in file yet
+    else:
+        file_dict[email] = [timeout_until, attempts]
+
+    # Only reset attempts if we're not locked out.
+    if login_success and not is_locked_out(timeout_until):
+        attempts = 0
+        file_dict[email] = [timeout_until, attempts]
+    # Login unsuccessful
+    else:
+        if not is_locked_out(timeout_until):
+            attempts += 1
+            if attempts % 3 == 0:
+                #  Timeout = 2^n seconds where n = (attempts % 3) - 1 = {0, 1, 2, 3, ...}
+                file_dict[email][0] = pendulum.now('UTC').add(minutes=((2**((attempts//3)-1)))).to_iso8601_string()
+            file_dict[email][1] = attempts
+    # Write back to disk and return timeout value
+    write_timeout_dict_to_file(file_dict)
+    return pendulum.parse(file_dict[email][0])
 
 
-# if __name__ == '__main__':
-app.run(debug=True)
+def is_locked_out(timeout_until):
+    if type(timeout_until) == str:
+        return pendulum.now('UTC') < pendulum.parse(timeout_until)
+    else:
+        return pendulum.now('UTC') < timeout_until
+
+
+def read_timeout_dict():
+    file = {}
+    try:
+        with open('last_failed.txt', 'r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                file[row[0]] = [row[1], row[2]]
+            f.close()
+    except FileNotFoundError:
+        pass
+    return file
+
+
+def write_timeout_dict_to_file(file_dict):
+    with open('last_failed.txt', 'w') as f:
+        writer = csv.writer(f)
+        for key, lst in file_dict.items():
+            writer.writerow([key, lst[0], lst[1]])
+        f.close()
+
+
+if __name__ == '__main__':
+    import os
+    os.environ["FLASK_ENV"] = "development"
+    app.run(debug=True)

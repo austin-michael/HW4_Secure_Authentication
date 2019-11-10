@@ -27,7 +27,7 @@
     <div class="row">
       <div class="col form-group text-center">
         <label for="username">Username (Email ID):</label>
-        <input name='email' class="form-control" id="username" placeholder="example@example.com" type="email">
+        <input name='email' class="form-control" id="username" placeholder="example@example.com" type="email" {% if email %}value="{{ email }}"{% else %}value=""{% endif %}>
       </div>
       <div class="col form-group text-center">
         <label for="password">Password:</label>
