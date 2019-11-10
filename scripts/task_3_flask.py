@@ -65,6 +65,8 @@ def login():
 
 
 def valid_password(password):
+    if len(password) < 3:
+        return False, "This password is too short."
     password_dict = {
         'dictionary': {},
         'info': {},
@@ -89,10 +91,10 @@ def valid_password(password):
         f2.close()
     
     for key, lst in password_dict['dictionary'].items():
-        if password in lst:
+        if password.lower() in lst:
             return False, "\"Your password is vulnerable to dictionary attack since you used the dictionary word: '{}', or a variation of this word in your password\"".format(key)
     for key, lst in password_dict['info'].items():
-        if password in lst:
+        if password.lower() in lst:
             return False, "Your password is vulnerable to targeted guessing attack since you used your {} or a part of it in your password".format(key)
     return True, ""
 

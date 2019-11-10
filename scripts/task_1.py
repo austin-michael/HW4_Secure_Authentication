@@ -30,7 +30,7 @@ def smart_pass_permuations(password=None):
             for func, pw in product([fx, fy, fz], pw_list):
                 tmp_list += func(pw)
             final_list += tmp_list
-        final_list = list(set(final_list))
+        final_list = list(set([pw.lower() for pw in final_list]))
         print('Length of variations of {password}: {length}'.format(password=password, length=len(final_list)))
         return final_list
         pass
@@ -131,7 +131,7 @@ if __name__ == '__main__':
                 final_list[row[0]] = row[0]
             f.close()
     for password in password_list:
-        final_list[password] = smart_pass_permuations(password=password)
+        final_list[password] = list(set(smart_pass_permuations(password=password)))
         final_list[password].sort()
     with open(args.o, 'w', newline='') as f:
         writer = csv.writer(f, delimiter=',')
