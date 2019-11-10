@@ -53,14 +53,13 @@ def login():
     if request.method == 'POST':
         would_log_in = valid_login(request.form['email'], request.form['password'])
         timeout = get_timeout(request.form['email'], would_log_in)
-        import ipdb; ipdb.set_trace()
         if pendulum.now('UTC') > timeout:
             if would_log_in:
                 message = 'You would log in succesfully'
             else:
                 error = 'Invalid username/password'
         else:
-            error = 'You have been locked out, you can log in again in {num} minutes'.format(num=(timeout - pendulum.now('UTC')).in_minutes())
+            error = 'You have been locked out, you can log in again in {num} minutes'.format(num=(timeout - pendulum.now('UTC')).in_minutes()+1)
 
     return render_template('login.html', error=error, message=message, email=request.form.get('email', default=None))
 
@@ -135,10 +134,6 @@ def valid_login(email, password):
     return False
 
 
-def login_timeout(email):
-    pass
-
-
 def get_hash_dict(email, password):
     """
     Reads in dictionary of hashes and salts. Final stored format is '<salt>.<hash>'
@@ -182,7 +177,7 @@ def get_timeout(email, login_success):
             attempts += 1
             if attempts % 3 == 0:
                 #  Timeout = 2^n seconds where n = (attempts % 3) - 1 = {0, 1, 2, 3, ...}
-                file_dict[email][0] = pendulum.now('UTC').add(minutes=((2**((attempts//3)-1))+1)).to_iso8601_string()
+                file_dict[email][0] = pendulum.now('UTC').add(minutes=((2**((attempts//3)-1)))).to_iso8601_string()
             file_dict[email][1] = attempts
     # Write back to disk and return timeout value
     write_timeout_dict_to_file(file_dict)
