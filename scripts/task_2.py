@@ -14,13 +14,17 @@ args = parser.parse_args()
 
 def remove_email_domain(email):
     temp_email = email.split('@')[0]
-    return temp_email.split('_')
+    ret_lst = []
+    #  Special chars allowed in email !#$%&'*+-/=?^_`{|}~
+    for char in ['!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}', '~']:
+        ret_lst += temp_email.split(char)
+    return ret_lst
 
 def split_street_address(street):
     return street.split(' ')
 
 def leetize_me_captain(password):
-    ret_list = []
+    ret_list = [password]
     leetDict = {
         'a': ['A', '@', '4', '^', '/\\', '/-\\', 'aye'],
         'b': ['B', '8', '6', '13', '|3', '/3'],
@@ -82,7 +86,6 @@ def caseChanger(password): #TODO update this so multiple characters will be capi
     return ret_list
 
 def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='', street='', apt_num='', city='', state='', zip_code='', email=''):
-    inputs = []
     possible_emails = remove_email_domain(email)
     first_six_tele = telephone_number[:7]
     first_six_tele = first_six_tele.replace('-','')
@@ -96,32 +99,57 @@ def gen_file(first_name='', last_name='', date_of_birth='', telephone_number='',
 
     charCaseChanger = [first_name, last_name, city, state]
 
-    if apt_num == "NA":
-        inputs = [first_name, last_name, date_of_birth, telephone_number, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:], flName, lfName, fNameDOBYY, lNameDOBYY, fNameDOBYYYY, lNameDOBYYYY]
-    else:
-        inputs = [first_name, last_name, date_of_birth, telephone_number, apt_num, city, state, zip_code, date_of_birth[-4:], date_of_birth[-2:], first_six_tele, telephone_number[-4:], flName, lfName, fNameDOBYY, lNameDOBYY, fNameDOBYYYY, lNameDOBYYYY]
+    inputs = {
+        'first_name': [first_name],
+        'last_name': [last_name],
+        'date_of_birth': [date_of_birth],
+        'telephone_number': [telephone_number],
+        'city': [city],
+        'state': [state],
+        'zip_code': [zip_code],
+        'birth_year': [date_of_birth[-4:]],
+        'shortened_birth_year': [date_of_birth[-2:]],
+        'first_six_of_telephone': [first_six_tele],
+        'telephone_number': [telephone_number[-4:]],
+        'first_and_last': [flName],
+        'last_and_first': [lfName],
+        'first_name_and_shortened_birth_year': [fNameDOBYY],
+        'last_name_and_shortened_birth_year': [lNameDOBYY],
+        'first_name_and_birth_year': [fNameDOBYYYY],
+        'last_name_and_shortened_birth_year': [lNameDOBYYYY],
+    }
+    if apt_num not in ['NA', 'N/A', 'na', 'n/a']:
+        inputs['apartment_number'] = [apt_num]
 
-    for item in possible_street_address:
-        inputs.append(item)
+    inputs['street_address'] = []
+    for i, item in enumerate(possible_street_address):
+        inputs['street_address'].append(item)
 
-    for item in possible_emails:
-        inputs.append(item)
+    inputs['email_address'] = []
+    for i, item in enumerate(possible_emails):
+        inputs['email_address'].append(item)
 
-    for item in charCaseChanger:
-        list_changed_cases = caseChanger(item)
-        for string in list_changed_cases:
-            inputs.append(string)
+    # for item in charCaseChanger:
+    #     list_changed_cases = caseChanger(item)
+    #     for string in list_changed_cases:
+    #         inputs.append(string)
 
-    passwords = []
-    for item in inputs:
-        passwords += leetize_me_captain(item)
-        passwords.append(item)
-    passwords = list(set(passwords))
-    passwords.sort()
+    passwords = {}
+    for key, lst in inputs.items():
+        passwords[key] = []
+        for item in lst:
+            passwords[key] += leetize_me_captain(item)
+    for key, lst in inputs.items():
+        passwords[key] = list(set(passwords[key]))
+        passwords[key].sort()
     with open(args.o, 'w', newline='') as f:
-        writer = csv.writer(f, delimiter=' ')
-        for pw in passwords:
-            writer.writerow([pw])
+        writer = csv.writer(f, delimiter=',')
+        for key, lst in passwords.items():
+            for pw in lst:
+                writer.writerow([key.replace('_', ' '), pw])
+                writer.writerow([key.replace('_', ' '), pw.upper()])
+                for item in caseChanger(pw):
+                    writer.writerow([key.replace('_', ' '), item])
     return passwords
 
 
@@ -138,7 +166,17 @@ if __name__ == '__main__':
     zip_code = input("Zip Code (first 5 digit): ")
     email = input("Email ID: ")
 
-    passwords = gen_file(first_name=first_name, last_name=last_name, date_of_birth=date_of_birth, telephone_number=telephone_number, apt_num=apt_num, city=city, state=state, zip_code=zip_code, email=email)
+    passwords = gen_file(
+        first_name=first_name,
+        last_name=last_name,
+        date_of_birth=date_of_birth,
+        telephone_number=telephone_number,
+        apt_num=apt_num,
+        city=city,
+        state=state,
+        zip_code=zip_code,
+        email=email
+    )
 
     print("List of common passwords with the given information: ")
     print(*passwords, sep = "\n")

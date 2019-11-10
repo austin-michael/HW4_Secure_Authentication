@@ -65,28 +65,35 @@ def login():
 
 
 def valid_password(password):
-    password_list = []
+    password_dict = {
+        'dictionary': {},
+        'info': {},
+    }
     with open('./ELCP-1.txt') as f, open('./ELCP-2.txt') as f2:
-        reader = csv.reader(f)
-        temp_list = []
+        reader = csv.reader(f, delimiter=',')
         for row in reader:
-            temp_list.append(row[0])
+            try:
+                password_dict['dictionary'][row[0]].append(row[1])
+            except KeyError:
+                password_dict['dictionary'][row[0]] = []
+                password_dict['dictionary'][row[0]].append(row[1])
         f.close()
 
-        password_list.append(temp_list)
-
-        reader = csv.reader(f2)
-        temp_list = []
+        reader = csv.reader(f2, delimiter=',')
         for row in reader:
-            temp_list.append(row[0])
+            try:
+                password_dict['info'][row[0]].append(row[1])
+            except KeyError:
+                password_dict['info'][row[0]] = []
+                password_dict['info'][row[0]].append(row[1])
         f2.close()
-
-        password_list.append(temp_list)
-
-    if password in password_list[0]:
-        return False, "“Your password is vulnerable to dictionary attack since you used the dictionary word: '{}', or a variation of this word in your password” ".format(password)
-    if password in password_list[1]:
-        return False, "Your password is vulnerable to targeted guessing attack since you used your personal information or a part of it in your password"
+    
+    for key, lst in password_dict['dictionary'].items():
+        if password in lst:
+            return False, "\"Your password is vulnerable to dictionary attack since you used the dictionary word: '{}', or a variation of this word in your password\"".format(key)
+    for key, lst in password_dict['info'].items():
+        if password in lst:
+            return False, "Your password is vulnerable to targeted guessing attack since you used your {} or a part of it in your password".format(key)
     return True, ""
 
 

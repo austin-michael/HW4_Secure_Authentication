@@ -14,6 +14,7 @@ parser.add_argument('-o',
                     default='./ELCP-1.txt')
 args = parser.parse_args()
 
+
 def smart_pass_permuations(password=None):
     final_list = [password]
     if password is not None and len(password) > 0:
@@ -30,68 +31,75 @@ def smart_pass_permuations(password=None):
                 tmp_list += func(pw)
             final_list += tmp_list
         final_list = list(set(final_list))
-        print(len(final_list))
+        print('Length of variations of {password}: {length}'.format(password=password, length=len(final_list)))
         return final_list
         pass
 
+
 def repeat_pass(password):
-    ret_list = []
+    ret_list = [password]
     ret_list.append('{}{}'.format(password, password))
     ret_list.append('{}{}{}'.format(password, password, password))
     return ret_list
 
+
 def reverse_pass(password):
     return [password[::-1]]
 
+
 def quick_adjust_pass(password):
-    ret_list = []
+    ret_list = [password]
     ret_list += capitalize_first(password)
     ret_list += permute_basic_chars(password)
     ret_list += permute_basic_chars(capitalize_first(password)[0])
     return ret_list
 
+
 def capitalize_first(password):
     return [password.title()]
 
+
 def permute_basic_chars(password):
-    ret_list = []
+    ret_list = [password]
     COMMON_CHARS = ['!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')']
-    for n, c in product(range(10), COMMON_CHARS):
+    COMMON_CHARS += range(0, 10)
+    for n, c in product(COMMON_CHARS, COMMON_CHARS):
         ret_list.append('{}{}'.format(password, n))
         ret_list.append('{}{}'.format(password, c))
         ret_list.append('{}{}{}'.format(password, n, c))
         ret_list.append('{}{}{}'.format(password, c, n))
     return ret_list
 
+
 def leetize_me_captain(password):
-    ret_list = []
+    ret_list = [password]
     leetDict = {
-        'a': ['@', '4', '^', '/\\', '/-\\', 'aye'],
-        'b': ['8', '6', '13', '|3', '/3'],
-        'c': ['<', '[', '(', '{'],
-        'd': [')', '|)', '[)', '?', '|>', '|o'],
-        'e': ['3', '&', '€', 'ë', '[-'],
-        'f': ['|=', '/=', '|#', 'ph'],
-        'g': ['6', '9', '&', 'C-', '(_+', 'gee'],
-        'h': ['#', '}{', '|-|', ']-[', '[-]', ')-(', '(-)', '/-/'],
-        'i': ['1', '!', '¡', '|', ']', 'eye'],
-        'j': [']', '¿', '_|', '_/', '</', '(/'],
-        'k': ['X', '|<', '|{', '|('],
-        'l': ['|', '1', '£', '|_', '1_'],
-        'm': ['|v|', '|\/|', '/\/\\', '(v)', '/|\\', '//.', '^^', 'em'],
-        'n': ['|\|', '/\/', '[\]', '/V', '^/'],
-        'o': ['0', '()', '[]', 'oh'],
-        'p': ['|*', '|o', '|"', '|>', '9', '|7', '|^(o)'],
-        'q': ['9', '0_', '()_', '(_,)', '<|'],
-        'r': ['2', '/2', '12', 'I2', 'l2', '|^', '|?', 'lz'],
-        's': ['5', '$', 'z', 'es'],
-        't': ['7', '+', '-|-', '\'][\''],
-        'u': ['|_|', '(_)', 'L|', 'v'],
-        'v': ['\/', '^'],
-        'w': ['VV', '\/\/', '\\\'', '\'//', '\|/', '\^/', '(n)'],
-        'x': ['%', '*', '><', '}{', ')(', 'ecks'],
-        'y': ['¥', 'J', '\'/', 'j'],
-        'z': ['2', '7_', '~/_', '>_', '%'],
+        'a': ['A', '@', '4', '^', '/\\', '/-\\', 'aye'],
+        'b': ['B', '8', '6', '13', '|3', '/3'],
+        'c': ['C', '<', '[', '(', '{'],
+        'd': ['D', ')', '|)', '[)', '?', '|>', '|o'],
+        'e': ['E', '3', '&', '€', 'ë', '[-'],
+        'f': ['F', '|=', '/=', '|#', 'ph'],
+        'g': ['G', '6', '9', '&', 'C-', '(_+', 'gee'],
+        'h': ['H', '#', '}{', '|-|', ']-[', '[-]', ')-(', '(-)', '/-/'],
+        'i': ['I', '1', '!', '¡', '|', ']', 'eye'],
+        'j': ['J', ']', '¿', '_|', '_/', '</', '(/'],
+        'k': ['K', 'X', '|<', '|{', '|('],
+        'l': ['L', '|', '1', '£', '|_', '1_'],
+        'm': ['M', '|v|', '|\/|', '/\/\\', '(v)', '/|\\', '//.', '^^', 'em'],
+        'n': ['N', '|\|', '/\/', '[\]', '/V', '^/'],
+        'o': ['O', '0', '()', '[]', 'oh'],
+        'p': ['P', '|*', '|o', '|"', '|>', '9', '|7', '|^(o)'],
+        'q': ['Q', '9', '0_', '()_', '(_,)', '<|'],
+        'r': ['R', '2', '/2', '12', 'I2', 'l2', '|^', '|?', 'lz'],
+        's': ['S', '5', '$', 'z', 'es'],
+        't': ['T', '7', '+', '-|-', '\'][\''],
+        'u': ['U', '|_|', '(_)', 'L|', 'v'],
+        'v': ['V', '\/', '^'],
+        'w': ['W', 'VV', '\/\/', '\\\'', '\'//', '\|/', '\^/', '(n)'],
+        'x': ['X', '%', '*', '><', '}{', ')(', 'ecks'],
+        'y': ['Y', '¥', 'J', '\'/', 'j'],
+        'z': ['Z', '2', '7_', '~/_', '>_', '%'],
     }
 
     low_pass = password.lower()
@@ -114,21 +122,22 @@ def leetize_me_captain(password):
 
 if __name__ == '__main__':
     password_list = []
-    final_list = []
+    final_list = {}
     if len(args.f) > 0:
         with open(args.f, newline='') as f:
             reader = csv.reader(f)
             for row in reader:
                 password_list.append(row[0])
-                final_list.append(row[0])
+                final_list[row[0]] = row[0]
             f.close()
     for password in password_list:
-        final_list += smart_pass_permuations(password=password)
-    final_list.sort()
+        final_list[password] = smart_pass_permuations(password=password)
+        final_list[password].sort()
     with open(args.o, 'w', newline='') as f:
-        writer = csv.writer(f, delimiter=' ')
-        for pw in final_list:
-            writer.writerow([pw])
+        writer = csv.writer(f, delimiter=',')
+        for key in final_list.keys():
+            for pw in final_list[key]:
+                writer.writerow([key, pw])
 
     # from IPython import embed
     # embed()
